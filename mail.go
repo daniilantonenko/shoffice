@@ -2,9 +2,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"net/smtp"
-	"text/template"
+	"html/template"
+	"log"
+	"os"
+
+	"gopkg.in/gomail.v2"
 )
 
 type Mail struct {
@@ -15,44 +19,54 @@ type Mail struct {
 }
 
 type ConfigMail struct {
+	EmailServer string
+	EmailPort   int
 	FromEmail   string
 	FromPass    string
+	CompanyName string
 	FileFormats []string
 }
 
-func sendMail(mail *Mail, config *ConfigMail) {
+func readConfig(fileName string) (config ConfigMail) {
+	// TODO: return a generic structure
 
-	// SMTP server configuration.
-	fromSmtpHost := "smtp.gmail.com"
-	fromSmtpPort := "587"
-
-	// Authentication.
-	auth := smtp.PlainAuth("", config.FromEmail, config.FromPass, fromSmtpHost)
-
-	template, _ := template.ParseFiles("templates/mail.html")
-
-	var body bytes.Buffer
-
-	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: %s \n%s\n\n", mail.Subject, mimeHeaders)))
-
-	template.Execute(&body, struct {
-		Name    string
-		Message string
-	}{
-		Name:    mail.Name,
-		Message: mail.Message,
-	})
-
-	toEmail := []string{
-		mail.ToEmail,
+	file, _ := os.Open(fileName)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	err := decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("error:", err)
 	}
 
-	// Sending email.
-	error := smtp.SendMail(fromSmtpHost+":"+fromSmtpPort, auth, config.FromEmail, toEmail, body.Bytes())
-	if error != nil {
-		fmt.Println(error)
-		return
+	return config
+}
+
+func sendMail(mail Mail, config ConfigMail) {
+
+	var err error
+	t, _ := template.ParseFiles("templates/mail.html")
+
+	if err != nil {
+		log.Println(err)
 	}
-	fmt.Println("Email Sent!")
+
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, mail); err != nil {
+		log.Println(err)
+	}
+
+	templateBody := tpl.String()
+	m := gomail.NewMessage()
+	m.SetHeader("From", config.FromEmail)
+	m.SetHeader("To", mail.ToEmail)
+	m.SetHeader("Subject", mail.Subject)
+	m.SetBody("text/html", templateBody)
+	m.Attach("test.png")
+
+	d := gomail.NewDialer(config.EmailServer, config.EmailPort, config.FromEmail, config.FromPass)
+
+	// Send the email
+	if err := d.DialAndSend(m); err != nil {
+		panic(err)
+	}
 }

@@ -1,34 +1,25 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
-	"os"
 )
-
-func readConfig(fileName string) (config ConfigMail) {
-	// TODO: return a generic structure
-
-	file, _ := os.Open(fileName)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&config)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	return config
-}
 
 func index(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
-		fmt.Fprintf(w, err.Error())
+		log.Println(err)
 	}
-	tmpl.ExecuteTemplate(w, "index", nil)
+	configMail := readConfig("conf.json")
+
+	tmpl.ExecuteTemplate(w, "index", struct {
+		Name string
+	}{
+		Name: configMail.CompanyName,
+	})
 }
 
 func send(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +31,15 @@ func send(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Не все данные заполнены!")
 	} else {
 		fmt.Println(emailForm, commentForm, fileForm)
+
+		configMail := readConfig("conf.json")
+		simpleMail := Mail{
+			Name:    "da",
+			Message: "Simple first test message.",
+			Subject: "Simple",
+			ToEmail: "daniil454122922@gmail.com"}
+		fmt.Println(simpleMail, configMail)
+		sendMail(simpleMail, configMail)
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -55,9 +55,4 @@ func handleRequest() {
 func main() {
 	// Initializing the Web Server
 	handleRequest()
-
-	configMail := readConfig("conf.json")
-	fmt.Println(configMail)
-	//sendMail(simpleMail, configMail)
-
 }
