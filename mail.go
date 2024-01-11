@@ -2,10 +2,8 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/smtp"
-	"os"
 	"text/template"
 )
 
@@ -57,18 +55,4 @@ func sendMail(mail *Mail, config *ConfigMail) {
 		return
 	}
 	fmt.Println("Email Sent!")
-}
-
-func readConfig(fileName string) (config ConfigMail) {
-	// TODO: return a generic structure
-
-	file, _ := os.Open(fileName)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&config)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	return config
 }

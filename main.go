@@ -1,30 +1,34 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 )
 
+func readConfig(fileName string) (config ConfigMail) {
+	// TODO: return a generic structure
+
+	file, _ := os.Open(fileName)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	err := decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	return config
+}
+
 func index(w http.ResponseWriter, r *http.Request) {
-	/*simpleMail := Mail{
-	Name:    "da",
-	Message: "Simple first test message.",
-	Subject: "Simple",
-	ToEmail: "daniil454122922@gmail.com"}
-	*/
-	//configMail := readConfig("conf.json")
 
 	tmpl, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 	}
-
 	tmpl.ExecuteTemplate(w, "index", nil)
-
-	//fmt.Println(simpleMail, configMail)
-
-	//fmt.Fprintf(w, "Name: "+simpleMail.Name)
 }
 
 func send(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +47,6 @@ func send(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequest() {
-	//http.Handle("/static/", http.StripPrefix("/static/"), http.FileServer(http.Dir("./css/")))
 	http.HandleFunc("/", index)
 	http.HandleFunc("/send", send)
 	http.ListenAndServe(":8080", nil)
@@ -53,13 +56,8 @@ func main() {
 	// Initializing the Web Server
 	handleRequest()
 
-	/*simpleMail := Mail{
-		Name:    "da",
-		Message: "Simple first test message.",
-		Subject: "Simple"}
-
 	configMail := readConfig("conf.json")
-
-	fmt.Println(simpleMail, configMail)*/
+	fmt.Println(configMail)
 	//sendMail(simpleMail, configMail)
+
 }
