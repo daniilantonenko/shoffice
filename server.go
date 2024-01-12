@@ -114,19 +114,12 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 		sendMail(simpleMail, configMail)
 	}
 
-	http.Redirect(w, r, "/confirmation", http.StatusSeeOther)
-	//http.Redirect(w, r, "/", http.StatusSeeOther)
-
-}
-
-func confirmation(w http.ResponseWriter, r *http.Request) {
 	render(w, "templates/confirmation.html", nil)
 }
 
 func handleRequest() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/send", sendForm)
-	http.HandleFunc("/confirmation", confirmation)
 	http.ListenAndServe(":8080", nil)
 }
 
