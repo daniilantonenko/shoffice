@@ -117,13 +117,9 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 	render(w, "templates/confirmation.html", nil)
 }
 
-func handleRequest() {
+func main() {
+	// Initializing the Web Server
 	http.HandleFunc("/", index)
 	http.HandleFunc("/send", sendForm)
 	http.ListenAndServe(":8080", nil)
-}
-
-func main() {
-	// Initializing the Web Server
-	handleRequest()
 }
