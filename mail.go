@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -12,19 +11,21 @@ import (
 )
 
 type Mail struct {
-	Name    string
-	Message string
-	Subject string
-	ToEmail string
+	Name     string
+	Message  string
+	Subject  string
+	ToEmail  string
+	FileName string
 }
 
 type ConfigMail struct {
-	EmailServer string
-	EmailPort   int
-	FromEmail   string
-	FromPass    string
-	CompanyName string
-	FileFormats []string
+	EmailServer   string
+	EmailPort     int
+	FromEmail     string
+	FromPass      string
+	CompanyName   string
+	FileFormats   []string
+	MaxUploadSize int64
 }
 
 func readConfig(fileName string) (config ConfigMail) {
@@ -35,7 +36,7 @@ func readConfig(fileName string) (config ConfigMail) {
 	decoder := json.NewDecoder(file)
 	err := decoder.Decode(&config)
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Println("error:", err)
 	}
 
 	return config
@@ -61,7 +62,7 @@ func sendMail(mail Mail, config ConfigMail) {
 	m.SetHeader("To", mail.ToEmail)
 	m.SetHeader("Subject", mail.Subject)
 	m.SetBody("text/html", templateBody)
-	m.Attach("test.png")
+	m.Attach(mail.FileName)
 
 	d := gomail.NewDialer(config.EmailServer, config.EmailPort, config.FromEmail, config.FromPass)
 

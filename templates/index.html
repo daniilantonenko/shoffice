@@ -1,7 +1,7 @@
 {{define "index"}}
 {{template "header"}}
 <body class="text-center">
-    <form class="form-signin" action="/send" method="post">
+    <form class="form-signin" action="/send" enctype="multipart/form-data" method="post">
       <!-- <img class="mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72"> -->
       <h1 class="h3 mb-3 font-weight-normal">Поделиться файлом{{ if .Name }} c {{.Name}}{{ else }}Поделиться файлом{{ end }}</h1>
 
@@ -11,12 +11,12 @@
       <label for="inputComment" class="sr-only">Комментарий</label>
       <input type="text" id="inputComment" name="inputComment" class="form-control" placeholder="Комментарий" required>
 
-      <label class="sr-only" for="formFile">Default file input example</label>
-      <input type="file" id="inputFile" name="inputFile"  class="form-control" type="file" id="formFile" required>
+      <label class="sr-only" for="inputFile">Default file input example</label>
+      <input type="file" id="inputFile" name="inputFile"  class="form-control" required>
       
       <div class="checkbox mb-3">
         <label>
-          <input type="checkbox" value="remember-me" required> Согласен с условиями предачи и хранения данных.
+          <input type="checkbox" id="checkboxAgreement" required> Согласен с условиями предачи и хранения данных.
         </label>
       </div>
       <!-- TODO: Captcha -->
