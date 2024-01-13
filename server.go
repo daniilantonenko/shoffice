@@ -13,47 +13,25 @@ import (
 )
 
 func render(w http.ResponseWriter, filename string, data interface{}) {
-	tmpl, err := template.ParseFiles(filename)
+	tmpl, err := template.ParseFiles("templates/"+filename+".html", "templates/header.html", "templates/footer.html")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
-		return
 	}
 
-	if err := tmpl.Execute(w, data); err != nil {
+	if err := tmpl.ExecuteTemplate(w, filename, data); err != nil {
 		log.Print(err)
 		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
 	}
 }
 
 func confirmation(w http.ResponseWriter, r *http.Request) {
-
-	tmpl, err := template.ParseFiles("templates/confirmation.html", "templates/header.html", "templates/footer.html")
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
-	}
-
-	if err := tmpl.ExecuteTemplate(w, "confirmation", nil); err != nil {
-		log.Print(err)
-		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
-	}
+	render(w, "confirmation", nil)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-
-	tmpl, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
-	}
 	configMail := readConfig("conf.json")
-
-	tmpl.ExecuteTemplate(w, "index", struct {
-		Name string
-	}{
-		Name: configMail.CompanyName,
-	})
+	render(w, "index", configMail)
 }
 
 func sendForm(w http.ResponseWriter, r *http.Request) {

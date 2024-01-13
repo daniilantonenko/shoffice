@@ -2,7 +2,7 @@
 {{template "header"}}
 <div class="text-center">
     <form class="form-signin" action="/send" enctype="multipart/form-data" method="post">
-      <h1 class="h3 mb-3 font-weight-normal">Поделиться файлом{{ if .Name }} c {{.Name}}{{ end }}</h1>
+      <h1 class="h3 mb-3 font-weight-normal">Поделиться файлом{{ if .CompanyName }} c {{.CompanyName}}{{ end }}</h1>
 
       <label for="inputComment" class="sr-only">Комментарий</label>
       <input type="text" id="inputComment" name="inputComment" class="form-control" placeholder="Комментарий" required>
