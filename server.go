@@ -26,11 +26,26 @@ func render(w http.ResponseWriter, filename string, data interface{}) {
 	}
 }
 
+func confirmation(w http.ResponseWriter, r *http.Request) {
+
+	tmpl, err := template.ParseFiles("templates/confirmation.html", "templates/header.html", "templates/footer.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
+	}
+
+	if err := tmpl.ExecuteTemplate(w, "confirmation", nil); err != nil {
+		log.Print(err)
+		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
+	}
+}
+
 func index(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		log.Println(err)
+		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
 	}
 	configMail := readConfig("conf.json")
 
@@ -114,12 +129,13 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 		sendMail(simpleMail, configMail)
 	}
 
-	render(w, "templates/confirmation.html", nil)
+	http.Redirect(w, r, "/confirmation", http.StatusSeeOther)
 }
 
 func main() {
 	// Initializing the Web Server
 	http.HandleFunc("/", index)
 	http.HandleFunc("/send", sendForm)
+	http.HandleFunc("/confirmation", confirmation)
 	http.ListenAndServe(":8080", nil)
 }
