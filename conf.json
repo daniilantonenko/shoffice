@@ -1,9 +1,0 @@
-{
-	"EmailServer": "smtp.gmail.com",
-	"EmailPort": 587,
-	"FromEmail": "daniil454122922@gmail.com",
-	"FromPass":  "kmvy tmrd xnls gbtm",
-	"CompanyName": "ArttexStudio",
-	"FileFormats" : [".jpg", ".png", ".CR3"],
-	"MaxUploadSize": 10485760
-}
