@@ -18,18 +18,7 @@ type Mail struct {
 	FileName string
 }
 
-type ConfigMail struct {
-	EmailServer   string
-	EmailPort     int
-	FromEmail     string
-	FromPass      string
-	CompanyName   string
-	FileFormats   []string
-	MaxUploadSize int64
-	Mode          string
-}
-
-func readConfig(fileName string) (config ConfigMail) {
+func readConfig(fileName string) (config Config) {
 	// TODO: return a generic structure
 
 	file, _ := os.Open(fileName)
@@ -43,7 +32,7 @@ func readConfig(fileName string) (config ConfigMail) {
 	return config
 }
 
-func sendMail(mail Mail, config ConfigMail) {
+func sendMail(mail Mail, config Config) {
 
 	var err error
 	t, _ := template.ParseFiles("templates/mail.html")

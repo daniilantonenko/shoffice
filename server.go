@@ -14,6 +14,17 @@ import (
 	"time"
 )
 
+type Config struct {
+	EmailServer   string
+	EmailPort     int
+	FromEmail     string
+	FromPass      string
+	CompanyName   string
+	FileFormats   []string
+	MaxUploadSize int64
+	Mode          string
+}
+
 func render(w http.ResponseWriter, filename string, data interface{}) {
 	tmpl, err := template.ParseFiles("templates/"+filename+".html", "templates/header.html", "templates/footer.html")
 	if err != nil {
