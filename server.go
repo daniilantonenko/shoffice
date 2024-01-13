@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,12 +18,12 @@ func render(w http.ResponseWriter, filename string, data interface{}) {
 	tmpl, err := template.ParseFiles("templates/"+filename+".html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
+		http.Error(w, "Sorry, Parse went wrong", http.StatusInternalServerError)
 	}
 
 	if err := tmpl.ExecuteTemplate(w, filename, data); err != nil {
 		log.Print(err)
-		http.Error(w, "Sorry, something went wrong", http.StatusInternalServerError)
+		http.Error(w, "Sorry, Execute went wrong", http.StatusInternalServerError)
 	}
 }
 
@@ -32,6 +34,30 @@ func confirmation(w http.ResponseWriter, r *http.Request) {
 func index(w http.ResponseWriter, r *http.Request) {
 	configMail := readConfig("conf.json")
 	render(w, "index", configMail)
+}
+
+func createFile(name string, file multipart.File) error {
+
+	if name != "" {
+		// Create file
+		dst, err := os.Create(name)
+
+		if err != nil {
+			return errors.New("cannot create file")
+		}
+
+		defer dst.Close()
+
+		// Copy the uploaded file to the created file on the filesystem
+		if _, err := io.Copy(dst, file); err != nil {
+			return errors.New("unable to save file")
+		} else {
+			log.Println("Successfully saved file")
+		}
+	} else {
+		return errors.New("no name provided")
+	}
+	return nil
 }
 
 func sendForm(w http.ResponseWriter, r *http.Request) {
@@ -76,21 +102,9 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 
 	fileName := fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), fileExt)
 
-	// Create file
-	dst, err := os.Create(fileName)
-
-	if err != nil {
+	if err := createFile(fileName, fileForm); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	defer dst.Close()
-
-	// Copy the uploaded file to the created file on the filesystem
-	if _, err := io.Copy(dst, fileForm); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	} else {
-		log.Println("Successfully Uploaded File")
 	}
 
 	// Checking data and sending a message
