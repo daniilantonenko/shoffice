@@ -60,6 +60,14 @@ func createFile(name string, file multipart.File) error {
 	return nil
 }
 
+func removeFile(name string) error {
+	e := os.Remove(name)
+	if e != nil {
+		log.Fatal(e)
+	}
+	return nil
+}
+
 func sendForm(w http.ResponseWriter, r *http.Request) {
 	// Checkin POST method
 	if r.Method != "POST" {
@@ -92,7 +100,7 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 	}
 	defer fileForm.Close()
 
-	//Checking a valid file extension
+	// Checking a valid file extension
 	fileExt := filepath.Ext(fileHeader.Filename)
 	if !slices.Contains(configMail.FileFormats, fileExt) {
 		log.Println(fileExt)
@@ -102,6 +110,7 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 
 	fileName := fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), fileExt)
 
+	// Create File
 	if err := createFile(fileName, fileForm); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -119,6 +128,12 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 			FileName: fileName}
 
 		sendMail(simpleMail, configMail)
+	}
+
+	// Remove File
+	if err := removeFile(fileName); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	http.Redirect(w, r, "/confirmation", http.StatusSeeOther)
