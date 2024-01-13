@@ -116,24 +116,29 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Checking data and sending a message
-	if commentForm == "" || fileForm == nil {
-		log.Println("Not all fields were filled in!")
-	} else {
-		simpleMail := Mail{
-			Name:     "Anonym",
-			Message:  commentForm,
-			Subject:  "Shared a file with you",
-			ToEmail:  configMail.FromEmail,
-			FileName: fileName}
+	switch configMail.Mode {
+	case "email":
+		// Checking data and sending a message
+		if commentForm == "" || fileForm == nil {
+			log.Println("Not all fields were filled in!")
+		} else {
+			simpleMail := Mail{
+				Name:     "Anonym",
+				Message:  commentForm,
+				Subject:  "Shared a file with you",
+				ToEmail:  configMail.FromEmail,
+				FileName: fileName}
 
-		sendMail(simpleMail, configMail)
-	}
+			sendMail(simpleMail, configMail)
 
-	// Remove File
-	if err := removeFile(fileName); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+			// Remove File after sending email
+			if err := removeFile(fileName); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+	default:
+		// The files are not sent and remain in the directory
 	}
 
 	http.Redirect(w, r, "/confirmation", http.StatusSeeOther)

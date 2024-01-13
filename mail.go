@@ -26,6 +26,7 @@ type ConfigMail struct {
 	CompanyName   string
 	FileFormats   []string
 	MaxUploadSize int64
+	Mode          string
 }
 
 func readConfig(fileName string) (config ConfigMail) {
