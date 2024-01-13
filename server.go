@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -23,6 +24,20 @@ type Config struct {
 	FileFormats   []string
 	MaxUploadSize int64
 	Mode          string
+}
+
+func readConfig(fileName string) (config Config) {
+	// TODO: return a generic structure
+
+	file, _ := os.Open(fileName)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	err := decoder.Decode(&config)
+	if err != nil {
+		log.Println("error:", err)
+	}
+
+	return config
 }
 
 func render(w http.ResponseWriter, filename string, data interface{}) {

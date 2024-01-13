@@ -2,10 +2,8 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"html/template"
 	"log"
-	"os"
 
 	"gopkg.in/gomail.v2"
 )
@@ -16,20 +14,6 @@ type Mail struct {
 	Subject  string
 	ToEmail  string
 	FileName string
-}
-
-func readConfig(fileName string) (config Config) {
-	// TODO: return a generic structure
-
-	file, _ := os.Open(fileName)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&config)
-	if err != nil {
-		log.Println("error:", err)
-	}
-
-	return config
 }
 
 func sendMail(mail Mail, config Config) {
