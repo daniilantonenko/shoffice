@@ -62,6 +62,10 @@ func index(w http.ResponseWriter, r *http.Request) {
 	render(w, "index", configMail)
 }
 
+func generate(w http.ResponseWriter, r *http.Request) {
+	render(w, "generate", generateQr("http://localhost:8080/"))
+}
+
 func createFile(name string, file multipart.File) error {
 
 	if name != "" {
@@ -175,5 +179,6 @@ func main() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/send", sendForm)
 	http.HandleFunc("/confirmation", confirmation)
+	http.HandleFunc("/generate", generate)
 	http.ListenAndServe(":8080", nil)
 }
