@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -165,8 +166,6 @@ func getIp() []string {
 			// check if IPv4 or IPv6 is not nil
 			if ipnet.IP.To4() != nil || ipnet.IP.To16() == nil {
 				// print available addresses
-				fmt.Println(ipnet.IP.String())
-				//arr[i] = "ipnet.IP.String()"
 				arr = append(arr, ipnet.IP.String())
 			}
 		}
@@ -179,6 +178,10 @@ func toBase64(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
+type test_struct struct {
+	Test string
+}
+
 // AJAX Request Handler
 func ajaxHandler(w http.ResponseWriter, r *http.Request) {
 	// Checkin POST method
@@ -187,29 +190,21 @@ func ajaxHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}*/
 
-	//parse request to struct
-	/*var d PageData
-	err := json.NewDecoder(r.Body).Decode(&d)
+	// Receiving POST data
+	body, err := io.ReadAll(r.Body)
+
 	if err != nil {
-		log.Println("NewDecoder")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
 	}
 
-	// create json response from struct
-	a, err := json.Marshal(d)
-	if err != nil {
-		log.Println("Marshal")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	log.Println(a)*/
+	ipString := "http://" + string(body) + ":8080/"
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-type", "image/png")
 
 	var base64Encoding string
 	base64Encoding += "data:image/png;base64,"
-	base64Encoding += toBase64(generateQrByte("http://localhost:8080/"))
+	base64Encoding += toBase64(generateQrByte(ipString))
 
 	w.Write([]byte(base64Encoding))
 }
