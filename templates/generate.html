@@ -1,6 +1,35 @@
-
 {{define "generate"}}
 {{template "header"}}
-    <img src="data:image/png;base64,{{.}}" alt="Blank"/>
+<div class="text-center form-generate">
+ <h3 class="h3 mb-3 font-weight-normal">Адрес</h3>
+  <form onsubmit="return sendForm()">
+    <select id="selectedImage" class="custom-select mb-3" >
+      {{ if .Images}}
+        {{range .Images}}
+          <option value="{{.}}">{{.}}</option>
+        {{end}}
+      {{end}}
+    </select><br>
+    <input class="btn btn-lg btn-primary btn-block" type="submit" value="Получить">
+  </form>
+  <br>
+  <img id="result"/>
+</div>
+  <script>
+    function sendForm() {
+      var selectedImage = document.getElementById("selectedImage").value;
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/ajax", true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          document.getElementById("result").src = xhr.responseText;
+        }
+      };
+      xhr.send(selectedImage);
+      return false;
+    }
+  </script>
+
 {{template "footer"}}
 {{end}}

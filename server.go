@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -59,8 +61,17 @@ func index(w http.ResponseWriter, r *http.Request) {
 	render(w, "index", configMail)
 }
 
+type PageData struct {
+	Images []string
+}
+
 func generate(w http.ResponseWriter, r *http.Request) {
-	render(w, "generate", generateQr("http://localhost:8080/"))
+
+	pageData := PageData{
+		Images: getIp(),
+	}
+
+	render(w, "generate", pageData)
 }
 
 func sendForm(w http.ResponseWriter, r *http.Request) {
@@ -139,11 +150,76 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/confirmation", http.StatusSeeOther)
 }
 
+func getIp() []string {
+	// get list of available addresses
+	addr, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	var arr []string
+
+	for _, addr := range addr {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			// check if IPv4 or IPv6 is not nil
+			if ipnet.IP.To4() != nil || ipnet.IP.To16() == nil {
+				// print available addresses
+				fmt.Println(ipnet.IP.String())
+				//arr[i] = "ipnet.IP.String()"
+				arr = append(arr, ipnet.IP.String())
+			}
+		}
+	}
+	// TODO: return []string
+	return arr
+}
+
+func toBase64(b []byte) string {
+	return base64.StdEncoding.EncodeToString(b)
+}
+
+// AJAX Request Handler
+func ajaxHandler(w http.ResponseWriter, r *http.Request) {
+	// Checkin POST method
+	/*if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}*/
+
+	//parse request to struct
+	/*var d PageData
+	err := json.NewDecoder(r.Body).Decode(&d)
+	if err != nil {
+		log.Println("NewDecoder")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	// create json response from struct
+	a, err := json.Marshal(d)
+	if err != nil {
+		log.Println("Marshal")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	log.Println(a)*/
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-type", "image/png")
+
+	var base64Encoding string
+	base64Encoding += "data:image/png;base64,"
+	base64Encoding += toBase64(generateQrByte("http://localhost:8080/"))
+
+	w.Write([]byte(base64Encoding))
+}
+
 func main() {
 	// Initializing the Web Server
 	http.HandleFunc("/", index)
 	http.HandleFunc("/send", sendForm)
 	http.HandleFunc("/confirmation", confirmation)
 	http.HandleFunc("/generate", generate)
+	http.HandleFunc("/ajax", ajaxHandler)
 	http.ListenAndServe(":8080", nil)
 }
