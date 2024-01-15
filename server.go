@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -151,29 +150,6 @@ func sendForm(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/confirmation", http.StatusSeeOther)
 }
 
-func getIp() []string {
-	// get list of available addresses
-	addr, err := net.InterfaceAddrs()
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-
-	var arr []string
-
-	for _, addr := range addr {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			// check if IPv4 or IPv6 is not nil
-			if ipnet.IP.To4() != nil || ipnet.IP.To16() == nil {
-				// print available addresses
-				arr = append(arr, ipnet.IP.String())
-			}
-		}
-	}
-	// TODO: return []string
-	return arr
-}
-
 func toBase64(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
@@ -185,10 +161,10 @@ type test_struct struct {
 // AJAX Request Handler
 func ajaxHandler(w http.ResponseWriter, r *http.Request) {
 	// Checkin POST method
-	/*if r.Method != "POST" {
+	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
-	}*/
+	}
 
 	// Receiving POST data
 	body, err := io.ReadAll(r.Body)
