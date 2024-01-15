@@ -63,13 +63,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 type PageData struct {
-	Images []string
+	Addresses []string
 }
 
 func generate(w http.ResponseWriter, r *http.Request) {
 
 	pageData := PageData{
-		Images: getIp(),
+		Addresses: getIp(),
 	}
 
 	render(w, "generate", pageData)
