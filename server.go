@@ -173,6 +173,8 @@ func ajaxHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	// TODO: check string(body) valide IP
+
 	ipString := "http://" + string(body) + ":8080/"
 
 	w.WriteHeader(http.StatusOK)
@@ -191,6 +193,6 @@ func main() {
 	http.HandleFunc("/send", sendForm)
 	http.HandleFunc("/confirmation", confirmation)
 	http.HandleFunc("/generate", generate)
-	http.HandleFunc("/ajax", ajaxHandler)
+	http.HandleFunc("/qrcode", ajaxHandler)
 	http.ListenAndServe(":8080", nil)
 }
