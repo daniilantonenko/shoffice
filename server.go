@@ -154,10 +154,6 @@ func toBase64(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
-type test_struct struct {
-	Test string
-}
-
 // AJAX Request Handler
 func ajaxHandler(w http.ResponseWriter, r *http.Request) {
 	// Checkin POST method
