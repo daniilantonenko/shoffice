@@ -185,6 +185,9 @@ func ajaxHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Initializing the Web Server
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	http.HandleFunc("/", index)
 	http.HandleFunc("/send", sendForm)
 	http.HandleFunc("/confirmation", confirmation)
