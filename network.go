@@ -27,3 +27,11 @@ func getIp() []string {
 	// TODO: return []string
 	return arr
 }
+
+func isIPv4(addr string) bool {
+	trial := net.ParseIP(addr)
+	if trial.To4() == nil {
+		return false
+	}
+	return true
+}

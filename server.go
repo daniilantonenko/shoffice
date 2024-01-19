@@ -169,9 +169,14 @@ func ajaxHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	// TODO: check string(body) valide IP
+	stringBody := string(body)
 
-	ipString := "http://" + string(body) + ":8080/"
+	if !isIPv4(stringBody) {
+		http.Error(w, "IP is not an IPv4 address.", http.StatusBadRequest)
+		return
+	}
+
+	ipString := "http://" + stringBody + ":8080/"
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-type", "image/png")
