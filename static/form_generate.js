@@ -1,55 +1,68 @@
-function ValidateIPaddress(ipaddress) {  
-    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
-      return (true)  
-    }  
-    return (false)  
-    } 
+function ValidateIPaddress(ipaddress) {
+  if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+    return (true)
+  }
+  return (false)
+}
 
-    var selectedOption = document.getElementById("selectedOption");
-    var diffrentInput = document.getElementById("inputDiffrent");
+function SendPostAndReturnImage(ipaddress){
+  var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/qrcode", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        document.getElementById("result").src = xhr.responseText;
+      }
+    };
+    xhr.send(ipaddress);
+}
 
-    if (selectedOption != null){
-      selectedOption.addEventListener('change',function(){
-        diffrentInput.classList.remove("d-none")
-      })
+var selectedOption = document.getElementById("selectedOption");
+var diffrentInput = document.getElementById("inputDiffrent");
+var diffrentGroup = document.getElementById("groupDiffrent");
+var valueAddress = "";
+
+// Show or hide "user address" input field
+if (selectedOption != null) {
+  selectedOption.addEventListener('change', function () {
+    if(selectedOption.value === "diffrent")
+    {
+      diffrentGroup.classList.remove("hide");
+    }else{
+      diffrentGroup.classList.add("hide");
+    }
+  })
+}
+
+function sendForm() {
+
+  // Selecting a path depending on the filling of the "user address" input field
+  if (selectedOption != null) {
+    if (selectedOption.value != "diffrent") {
+      // Get value from options
+      valueAddress = document.getElementById("selectedOption").value;
+    } else {
+      // Get value from diffrent input
+      valueAddress = document.getElementById("inputDiffrent").value;
+    }
+  } else {
+    // Get value from diffrent input
+    valueAddress = document.getElementById("inputDiffrent").value;
+  }
+
+  if (ValidateIPaddress(valueAddress)) {
+    // IP is valid
+    if (selectedOption != null) {
+      diffrentInput.classList.remove("is-invalid")
     }
 
-    function sendForm() {
-      // selectedOption == null || selectedOption.value == "diffrent"
+    SendPostAndReturnImage(valueAddress);
 
-      selectedOption = document.getElementById("selectedOption");
-      diffrentInput = document.getElementById("inputDiffrent");
+    return false;
+  } else {
+    // IP is invalid
+    diffrentInput.classList.add("is-invalid")
 
-      if (selectedOption != null){
-        if (selectedOption.value != "diffrent"){
-          // Get value from options
-          selectedOption = document.getElementById("selectedOption").value;
-        }else{
-          // Get value from diffrent input
-          selectedOption = document.getElementById("inputDiffrent").value;
-        }
-      }else{
-        // Get value from diffrent input
-        selectedOption = document.getElementById("inputDiffrent").value;
-      }
-
-      if (ValidateIPaddress(selectedOption)){
-        // IP is valid
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/qrcode", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            document.getElementById("result").src = xhr.responseText;
-          }
-        };
-        xhr.send(selectedOption);
-        return false;
-      }else{
-        // IP is invalid
-        // TODO: add message "You have entered an invalid IP address!")
-        diffrentInput.classList.add("is-invalid")
-        
-        return false;
-      }
-    }
+    return false;
+  }
+}
