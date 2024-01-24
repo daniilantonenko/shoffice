@@ -5,16 +5,25 @@ function ValidateIPaddress(ipaddress) {
   return (false)
 }
 
-function SendPostAndReturnImage(ipaddress){
+function SendPostAndReturnImage(ipaddress) {
   var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/qrcode", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        document.getElementById("result").src = xhr.responseText;
-      }
-    };
-    xhr.send(ipaddress);
+  xhr.open("POST", "/qrcode", true);
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      document.getElementById("result").src = xhr.responseText;
+    }
+  };
+  xhr.send(ipaddress);
+}
+
+function AnimateClass(animateClass) {
+  setTimeout(function () {
+    document.getElementById('result').classList.add(animateClass)
+  }, 50);
+  setTimeout(function () {
+    document.getElementById('result').classList.remove(animateClass)
+  }, 500);
 }
 
 var selectedOption = document.getElementById("selectedOption");
@@ -25,10 +34,9 @@ var valueAddress = "";
 // Show or hide "user address" input field
 if (selectedOption != null) {
   selectedOption.addEventListener('change', function () {
-    if(selectedOption.value === "diffrent")
-    {
+    if (selectedOption.value === "diffrent") {
       diffrentGroup.classList.remove("hide");
-    }else{
+    } else {
       diffrentGroup.classList.add("hide");
     }
   })
@@ -52,11 +60,11 @@ function sendForm() {
 
   if (ValidateIPaddress(valueAddress)) {
     // IP is valid
-    if (selectedOption != null) {
-      diffrentInput.classList.remove("is-invalid")
-    }
+    diffrentInput.classList.remove("is-invalid")
 
     SendPostAndReturnImage(valueAddress);
+
+    AnimateClass("image-qr-focus");
 
     return false;
   } else {
