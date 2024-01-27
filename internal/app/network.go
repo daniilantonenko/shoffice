@@ -1,11 +1,11 @@
-package main
+package app
 
 import (
 	"fmt"
 	"net"
 )
 
-func getIp() []string {
+func GetIp() []string {
 	// get list of available addresses
 	addr, err := net.InterfaceAddrs()
 	if err != nil {
@@ -28,10 +28,7 @@ func getIp() []string {
 	return arr
 }
 
-func isIPv4(addr string) bool {
+func IsIPv4(addr string) bool {
 	trial := net.ParseIP(addr)
-	if trial.To4() == nil {
-		return false
-	}
-	return true
+	return trial.To4() != nil
 }
