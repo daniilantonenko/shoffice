@@ -46,17 +46,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	render(w, "index", configMail)
 }
 
-type PageData struct {
-	Addresses []string
-}
-
 func Generate(w http.ResponseWriter, r *http.Request) {
 
-	pageData := PageData{
-		Addresses: GetIp(),
-	}
-
-	render(w, "generate", pageData)
+	render(w, "generate", map[string][]string{"Addresses": GetIp()})
 }
 
 func SendForm(w http.ResponseWriter, r *http.Request) {
