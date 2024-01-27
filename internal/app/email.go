@@ -16,7 +16,7 @@ type Mail struct {
 	FileName string
 }
 
-func SendMail(mail Mail, config Config) error {
+func (mail *Mail) SendMail(config Config) error {
 
 	var err error
 	t, _ := template.ParseFiles("templates/mail.html")
@@ -47,3 +47,13 @@ func SendMail(mail Mail, config Config) error {
 
 	return nil
 }
+
+/*
+func createMessage() *gomail.Message {
+	m := NewMessage()
+	m.SetHeader("From", testFrom)
+	m.SetHeader("To", testTo1, testTo2)
+	m.SetBody("text/plain", testBody)
+
+	return m
+}*/

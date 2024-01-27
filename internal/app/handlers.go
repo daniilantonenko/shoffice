@@ -102,9 +102,7 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 	switch configMail.Mode {
 	case "email":
 		// Checking data and sending a message
-		if commentForm == "" || fileForm == nil {
-			log.Println("Not all fields were filled in!")
-		} else {
+		if commentForm != "" && fileForm != nil {
 			simpleMail := Mail{
 				Name:     "Anonym",
 				Message:  commentForm,
@@ -112,7 +110,7 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 				ToEmail:  configMail.FromEmail,
 				FileName: fileName}
 
-			err := SendMail(simpleMail, configMail)
+			err := simpleMail.SendMail(configMail)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -124,6 +122,8 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+		} else {
+			log.Println("Not all fields were filled in!")
 		}
 	default:
 		// The files are not sent and remain in the directory
