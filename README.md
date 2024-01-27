@@ -9,7 +9,7 @@ After successful submission, the file will be automatically delivered, depending
 
 
 ### Configuration
-Change the conf.json file according to your settings, below is an example with possible parameters.
+Create the conf.json file according to your settings, below is an example with possible parameters.
 
 #### Required:
 - "EmailServer": "smtp.example.com"
@@ -22,6 +22,24 @@ Change the conf.json file according to your settings, below is an example with p
 - "FileFormats" : [".jpg", ".png"] – can contain an array of formats available for loading through the form
 - "MaxUploadSize": 10485760 – maximum file size when uploading through the form (10485760 bytes = 10 megabytes)
 
-## Plan
+### Build and Run 
+Creating an application from source files. This assumes that git and go are already installed on the device.
+```
+git clone https://github.com/daniilantonenko/shoffice.git
+go build ./cmd/app/
+./app
+```
+
+### Launch
+
+1. Go to http://localhost:8080/generate
+2. Select an address from the list or enter it manually (item “specify yours”)
+3. Save the generated image for posting
+
+
+### Plan
 - [X] Basic file upload function
-- [ ] Generation of QR code
+- [X] Generation of QR code
+- [ ] Installing the application via Docker
+- [ ] Adding HTTPS
+- [ ] Print a beautiful page with a QR code
