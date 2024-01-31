@@ -40,6 +40,7 @@ go build ./cmd/app/
 ### Plan
 - [X] Basic file upload function
 - [X] Generation of QR code
+- [ ] Configuration via env
 - [ ] Installing the application via Docker
 - [ ] Adding Multiple Files
 - [ ] Adding captcha
