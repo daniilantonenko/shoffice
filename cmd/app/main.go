@@ -7,6 +7,11 @@ import (
 )
 
 func main() {
+	configuration, err := app.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
 	// Initializing the Web Server
 	fs := http.FileServer(http.Dir("./web/static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -17,7 +22,7 @@ func main() {
 	http.HandleFunc("/generate", app.Generate)
 	http.HandleFunc("/qrcode", app.AjaxHandler)
 
-	err := http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(configuration.ServerPort, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
