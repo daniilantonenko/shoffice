@@ -41,5 +41,7 @@ go build ./cmd/app/
 - [X] Basic file upload function
 - [X] Generation of QR code
 - [ ] Installing the application via Docker
+- [ ] Adding Multiple Files
+- [ ] Adding captcha
 - [ ] Adding HTTPS
 - [ ] Print a beautiful page with a QR code
