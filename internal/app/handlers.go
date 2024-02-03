@@ -91,7 +91,7 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileName := fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), fileExt)
+	fileName := fmt.Sprintf("./web/uploads/%d%s", time.Now().UnixNano(), fileExt)
 
 	// Create File
 	if err := CreateFile(fileName, fileForm); err != nil {
