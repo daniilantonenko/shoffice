@@ -17,6 +17,10 @@ func main() {
 	http.HandleFunc("/generate", app.Generate)
 	http.HandleFunc("/qrcode", app.AjaxHandler)
 
+	log.Println("Server is running at 127.0.0.1:8080")
+	log.Println("QR generate page 127.0.0.1:8080/generate")
+	log.Println("Server mode: default")
+
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal(err)
