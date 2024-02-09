@@ -12,8 +12,8 @@ jobs:
         with:
           go-version: '1.21.x'
       - name: Install dependencies
-        run: go get ./cmd/app/
+        run: go get ./...
       - name: Build
         run: go build -v ./cmd/app/main.go
       - name: Test with the Go CLI
-        run: go test
+        run: go test ./...
