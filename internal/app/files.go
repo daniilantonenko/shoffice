@@ -1,15 +1,14 @@
 package app
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"log"
-	"mime/multipart"
 	"os"
+	"path/filepath"
 )
 
-func CreateFile(name string, file multipart.File) error {
+func CreateFile(name string, file io.Reader) error {
 
 	if name != "" {
 		// Create file
@@ -41,16 +40,8 @@ func RemoveFile(name string) error {
 	return nil
 }
 
-func ReadConfig(fileName string) (config Config) {
-	// TODO: return a generic structure
-
-	file, _ := os.Open(fileName)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&config)
-	if err != nil {
-		log.Println("error:", err)
-	}
-
-	return config
+func RootDir() string {
+	f, _ := os.Getwd()
+	f = filepath.Dir(filepath.Dir(f))
+	return f
 }

@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 )
 
 func render(w http.ResponseWriter, filename string, data interface{}) {
-	//tmpl, err := template.ParseFiles("templates/"+filename+".html", "templates/header.html", "templates/footer.html")
 	tmpl, err := template.ParseFiles("./web/templates/"+filename+".html", "./web/templates/header.html", "./web/templates/footer.html")
 	if err != nil {
 		log.Println(err)
@@ -30,10 +30,11 @@ func Confirmation(w http.ResponseWriter, r *http.Request) {
 	render(w, "confirmation", nil)
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	configMail := ReadConfig("conf.json")
-	// configuration.
-	render(w, "index", configMail)
+func Index(cfg Configuration) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		render(w, "index", cfg)
+	}
+	return http.HandlerFunc(fn)
 }
 
 func Generate(w http.ResponseWriter, r *http.Request) {
@@ -41,85 +42,89 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	render(w, "generate", map[string][]string{"Addresses": GetIp()})
 }
 
-func SendForm(w http.ResponseWriter, r *http.Request) {
-	// Checkin POST method
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func SendForm(cfg Configuration) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 
-	// Read config
-	configMail := ReadConfig("conf.json")
-
-	// Checking a max upload size
-	maxUploadSize := configMail.MaxUploadSize // 10 MB
-	r.Body = http.MaxBytesReader(w, r.Body, int64(maxUploadSize))
-	err := r.ParseMultipartForm(int64(maxUploadSize))
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "A file with an invalid size.", http.StatusBadRequest)
-		return
-	}
-
-	// Receiving POST data
-	commentForm := r.FormValue("inputComment")
-
-	// Read file
-	fileForm, fileHeader, err := r.FormFile("inputFile")
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Failed to process form.", http.StatusInternalServerError)
-		return
-	}
-	defer fileForm.Close()
-
-	// Checking a valid file extension
-	fileExt := filepath.Ext(fileHeader.Filename)
-	if !slices.Contains(configMail.FileFormats, fileExt) {
-		log.Println(fileExt)
-		http.Error(w, "A file with an invalid extension.", http.StatusBadRequest)
-		return
-	}
-
-	fileName := fmt.Sprintf("./web/uploads/%d%s", time.Now().UnixNano(), fileExt)
-
-	// Create File
-	if err := CreateFile(fileName, fileForm); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	switch configMail.Mode {
-	case "email":
-		// Checking data and sending a message
-		if commentForm != "" && fileForm != nil {
-			simpleMail := Mail{
-				Name:     "Anonym",
-				Message:  commentForm,
-				Subject:  "Shared a file with you",
-				ToEmail:  configMail.FromEmail,
-				FileName: fileName}
-
-			err := simpleMail.SendMail(configMail)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			// Remove File after sending email
-			if err := RemoveFile(fileName); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		} else {
-			log.Println("Not all fields were filled in!")
+		// Checkin POST method
+		if r.Method != "POST" {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
 		}
-	default:
-		// The files are not sent and remain in the directory
-	}
 
-	http.Redirect(w, r, "/confirmation", http.StatusSeeOther)
+		// Checking a max upload size
+		maxUploadSize := cfg.MaxUploadSize
+		r.Body = http.MaxBytesReader(w, r.Body, int64(maxUploadSize))
+		err := r.ParseMultipartForm(int64(maxUploadSize))
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "A file with an invalid size.", http.StatusBadRequest)
+			return
+		}
+
+		// Receiving POST data
+		commentForm := r.FormValue("inputComment")
+
+		// Read file
+		fileForm, fileHeader, err := r.FormFile("inputFile")
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Failed to process form.", http.StatusInternalServerError)
+			return
+		}
+		defer fileForm.Close()
+
+		// Checking a valid file extension
+		fileFormatString := cfg.FileFormats
+		fileFormats := strings.Split(fileFormatString, ",")
+
+		fileExt := filepath.Ext(fileHeader.Filename)
+
+		if fileFormats != nil && !slices.Contains(fileFormats, fileExt) {
+			http.Error(w, "A file with an invalid extension.", http.StatusBadRequest)
+			return
+		}
+
+		fileName := fmt.Sprintf("./web/uploads/%d%s", time.Now().UnixNano(), fileExt)
+
+		// Create File
+		if err := CreateFile(fileName, fileForm); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fromEmail := cfg.EmailAddress
+
+		if fromEmail != "" {
+			// Checking data and sending a message
+			if commentForm != "" && fileForm != nil {
+				simpleMail := Mail{
+					Name:     "Anonym",
+					Message:  commentForm,
+					Subject:  "Shared a file with you",
+					ToEmail:  fromEmail,
+					FileName: fileName}
+
+				err := cfg.Send(simpleMail)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				// Remove File after sending email
+				if err := RemoveFile(fileName); err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			} else {
+				log.Println("Not all fields were filled in!")
+			}
+		}
+		// The files are not sent and remain in the directory
+
+		http.Redirect(w, r, "/confirmation", http.StatusSeeOther)
+	}
+	return http.HandlerFunc(fn)
 }
 
 func toBase64(b []byte) string {

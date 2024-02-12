@@ -16,44 +16,46 @@ type Mail struct {
 	FileName string
 }
 
-func (mail *Mail) SendMail(config Config) error {
-
+func (cfg *Configuration) Send(mail Mail) error {
 	var err error
-	t, _ := template.ParseFiles("templates/mail.html")
 
+	/*fileWithPath := filepath.Join(RootDir(), "./web/templates/mail.html")
 	if err != nil {
-		log.Println(err)
+		log.Fatalln(err)
+	}*/
+
+	t, err := template.ParseFiles("./web/templates/mail.html")
+	if err != nil {
+		return err
 	}
 
 	var tpl bytes.Buffer
 	if err := t.Execute(&tpl, mail); err != nil {
-		log.Println(err)
+		return err
 	}
 
 	templateBody := tpl.String()
 	m := gomail.NewMessage()
-	m.SetHeader("From", config.FromEmail)
+	m.SetHeader("From", mail.ToEmail)
 	m.SetHeader("To", mail.ToEmail)
 	m.SetHeader("Subject", mail.Subject)
 	m.SetBody("text/html", templateBody)
 	m.Attach(mail.FileName)
 
-	d := gomail.NewDialer(config.EmailServer, config.EmailPort, config.FromEmail, config.FromPass)
+	// TODO: func create email server
+	senderServer := cfg.EmailHost
+	senderPort := cfg.EmailPort
+	senderEmail := mail.ToEmail
+	senderPass := cfg.EmailPassword
+
+	d := gomail.NewDialer(senderServer, senderPort, senderEmail, senderPass)
 
 	// Send the email
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
 
+	log.Println("Message sent successfully")
+
 	return nil
 }
-
-/*
-func createMessage() *gomail.Message {
-	m := NewMessage()
-	m.SetHeader("From", testFrom)
-	m.SetHeader("To", testTo1, testTo2)
-	m.SetBody("text/plain", testBody)
-
-	return m
-}*/
