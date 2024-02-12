@@ -1,47 +1,43 @@
 package app
 
 import (
+	"log"
+
 	"github.com/spf13/viper"
 )
 
 type Configuration struct {
-	CompanyName   string `mapstructure:"COMPANY_NAME"`
-	MaxUploadSize int    `mapstructure:"MAX_UPLOAD_SIZE"`
-	ServerPort    string `mapstructure:"SERVER_PORT"`
-	ConfigMail    ConfigurationEmail
-}
+	ServerPort string `mapstructure:"SERVER_PORT"`
 
-type ConfigurationEmail struct {
-	EmailServer   string `mapstructure:"EMAIL_SERVER"`
+	CompanyName string `mapstructure:"COMPANY_NAME"`
+
+	MaxUploadSize int    `mapstructure:"MAX_UPLOAD_SIZE"`
+	FileFormats   string `mapstructure:"FILE_FORMATS"`
+
+	EmailHost     string `mapstructure:"EMAIL_SERVER"`
 	EmailPort     int    `mapstructure:"EMAIL_PORT"`
 	EmailAddress  string `mapstructure:"EMAIL_ADDRESS"`
 	EmailPassword string `mapstructure:"EMAIL_PASSWORD"`
 }
 
-type Config struct {
-	EmailServer   string
-	EmailPort     int
-	FromEmail     string
-	FromPass      string
-	CompanyName   string
-	FileFormats   []string
-	MaxUploadSize int64
-	Mode          string
-}
+// Reading configuration from file or environment variables.
+func NewConfig() (*Configuration, error) {
+	cfg := &Configuration{}
 
-// LoadConfig reads configuration from file or environment variables.
-func LoadConfig(path string) (config Configuration, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
+	viper.SetConfigFile(".env")
 
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
-		return
+		log.Fatal("cannot load config:", err)
+		return nil, err
 	}
 
-	err = viper.Unmarshal(&config)
-	return
+	err = viper.Unmarshal(&cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
 }
