@@ -2,9 +2,8 @@ name: Build and Push Docker Image to Docker Hub
 
 on:
   workflow_run:
-    workflows: ["Build and test"]
-    types:
-      - completed
+    workflows: [Build and test]
+    types: [completed]
 
 jobs:
   build:
