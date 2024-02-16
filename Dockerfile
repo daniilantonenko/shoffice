@@ -15,7 +15,7 @@ FROM alpine
 WORKDIR /build
 
 COPY web/ web/
-COPY conf.json .
+COPY .env .
 
 COPY --from=builder /build/shoffice /build/shoffice
 
