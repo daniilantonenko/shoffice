@@ -59,3 +59,14 @@ func (cfg *Configuration) Send(mail Mail) error {
 
 	return nil
 }
+
+func NewDialer(cfg *Configuration) *gomail.Dialer {
+	senderServer := cfg.EmailHost
+	senderPort := cfg.EmailPort
+	senderEmail := cfg.EmailAddress
+	senderPass := cfg.EmailPassword
+
+	d := gomail.NewDialer(senderServer, senderPort, senderEmail, senderPass)
+
+	return d
+}
