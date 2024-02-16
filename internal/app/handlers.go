@@ -79,7 +79,7 @@ func SendForm(cfg Configuration) http.Handler {
 
 		fileExt := filepath.Ext(fileHeader.Filename)
 
-		if fileFormats != nil && !slices.Contains(fileFormats, fileExt) {
+		if fileFormatString != "" && !slices.Contains(fileFormats, fileExt) {
 			http.Error(w, "A file with an invalid extension.", http.StatusBadRequest)
 			return
 		}
