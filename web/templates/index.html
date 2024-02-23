@@ -1,0 +1,23 @@
+{{define "index"}}
+{{template "header"}}
+<div class="text-center">
+    <form class="form-signin" action="/send" enctype="multipart/form-data" method="post">
+      <h1 class="h3 mb-3 font-weight-normal">Поделиться файлом{{ if .CompanyName }} c {{.CompanyName}}{{ end }}</h1>
+
+      <label for="inputComment" class="sr-only">Комментарий</label>
+      <input type="text" id="inputComment" name="inputComment" class="form-control" placeholder="Комментарий" required>
+
+      <label class="sr-only" for="inputFile"></label>
+      <input type="file" id="inputFile" name="inputFile"  class="form-control" required>
+      
+      <div class="checkbox mb-3">
+        <label>
+          <input type="checkbox" id="checkboxAgreement" required> Согласен с условиями предачи и хранения данных.
+        </label>
+      </div>
+      <!-- TODO: Captcha -->
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Отправить</button>
+    </form>
+  </div>
+  {{template "footer"}}
+  {{end}}

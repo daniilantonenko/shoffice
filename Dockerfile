@@ -1,16 +1,24 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.21.5
+FROM golang:alpine AS builder
 
-WORKDIR /app
+WORKDIR /build
 
-COPY go.mod go.sum ./
-RUN go mod download
+ADD go.mod .
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-shoffice
+RUN go build -o shoffice ./cmd/app/main.go
+
+FROM alpine
+
+WORKDIR /build
+
+COPY web/ web/
+COPY .env .
+
+COPY --from=builder /build/shoffice /build/shoffice
 
 EXPOSE 8080
 
-CMD [ "/docker-shoffice" ]
+CMD [ "./shoffice" ]
