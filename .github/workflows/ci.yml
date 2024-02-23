@@ -1,5 +1,4 @@
-name: Build and test
-
+name: CI
       
 on:
   push:
@@ -8,18 +7,23 @@ on:
     branches: [ "develop", "main" ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21.x'
+
       - name: Install dependencies
         run: go get ./...
+
       - name: Build
         run: go build -v ./cmd/app/main.go
-      - name: Test with the Go CLI
+
+      - name: Test
         run: go test ./...
